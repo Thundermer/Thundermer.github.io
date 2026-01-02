@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Budget Chart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body class="bg-gray-900 text-white p-10">
+    <div class="text-2xl font-bold text-center mb-6">
+        ผลการใช้จ่ายงบประมาณประจำปี พ.ศ.2566<br>
+        <span class="text-sky-400 text-lg font-normal">องค์กร : กองทุนบำเหน็จบำนาญข้าราชการ</span>
+    </div>
+
+    <div class="flex justify-center gap-3 mb-6">
+        <button onclick="setType('bar')"
+            class="px-6 py-2 bg-sky-500 hover:bg-sky-400 transition rounded font-medium">Bar Chart</button>
+        <button onclick="setType('pie')"
+            class="px-6 py-2 bg-purple-600 hover:bg-purple-500 transition rounded font-medium">Pie Chart</button>
+    </div>
+
+    <div class="bg-gray-800 p-5 rounded-lg shadow-lg">
+        <div id="budgetChart"></div>
+    </div>
+
+    <script>
+        const budgetData = [
+            { BudgetType: "งบดำเนินการ", BudgetValue: 1806.6, UsedValue: 1436.9 },
+            { BudgetType: "งบลงทุน", BudgetValue: 65.6, UsedValue: 39.1 },
+            { BudgetType: "งบตามแผนยุทธศาสตร์", BudgetValue: 4.0, UsedValue: 1.1 }
+        ];
+
+        const categories = budgetData.map(d => d.BudgetType);
+        const usedValues = budgetData.map(d => d.UsedValue);
+        const totalValues = budgetData.map(d => d.BudgetValue);
+
+        const options = {
+            chart: {
+                type: "bar",
+                height: 380,
+                toolbar: { show: false },
+                foreColor: "#e5e7eb"
+            },
+            colors: ["#61a8ff", "#ff7e61"],
+            series: [
+                { name: "Used (เบิกจ่าย)", data: usedValues },
+                { name: "Total (งบประมาณ)", data: totalValues }
+            ],
+            xaxis: { categories: categories },
+            // This ensures data labels are rounded if they appear on bars too
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return Math.round(val);
+                }
+            },
+            tooltip: { theme: 'dark' },
+            legend: { position: 'top' }
+        };
+
+        const chart = new ApexCharts(document.querySelector("#budgetChart"), options);
+        chart.render();
+
+        function setType(type) {
+            if (type === "pie") {
+                chart.updateOptions({
+                    chart: { type: "pie" },
+                    series: usedValues,
+                    labels: categories,
+                    colors: ["#61a8ff", "#ff7e61", "#ff82ee"],
+                    legend: { position: 'bottom' },
+                    plotOptions: {
+                        pie: {
+                            dataLabels: {
+                                offset: -5 // Moves label inside the slice
+                            }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        // This specifically rounds the percentage shown on the pie slices
+                        formatter: function (val, opts) {
+                            return Math.round(val) + "%";
+                        }
+                    }
+                }, true);
+            } else {
+                chart.updateOptions({
+                    chart: { type: "bar" },
+                    series: [
+                        { name: "Used (เบิกจ่าย)", data: usedValues },
+                        { name: "Total (งบประมาณ)", data: totalValues }
+                    ],
+                    xaxis: { categories: categories },
+                    colors: ["#61a8ff", "#ff7e61"],
+                    legend: { position: 'top' },
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function (val) {
+                            return Math.round(val);
+                        }
+                    }
+                }, true);
+            }
+        }
+    </script>
+
+    <div class="text-center mt-6 text-gray-400 pb-1">
+        <p class="text-sm">หน่วย: ล้านบาท</p>
+        <p class="text-xs mt-2">Source: <a href="https://data.go.th/dataset/opn00016" target="_blank"
+                class="underline">https://data.go.th/dataset/opn00016</a></p>
+    </div>
+</body>
+
+</html>
